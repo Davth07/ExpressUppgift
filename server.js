@@ -6,7 +6,7 @@ app.use(express.json());
 
 const db = new sqlite3.Database("./tasks.db");
 db.run(
-  `CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, title TEXT NOT NULL, description TEXT, completed BOOLEAN DEFAULT FALSE)`,
+  `CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY, title TEXT NOT NULL, completed BOOLEAN DEFAULT FALSE)`,
 );
 
 app.get("/", (req, res) => {
@@ -20,18 +20,19 @@ app.get("/tasks", (req, res) => {
 
 app.post("/tasks", (req, res) => {
   const title = req.body.title;
-  const description = req.body.description;
   const completed = req.body.completed;
   db.run(
-    "INSERT INTO tasks (title, description, completed) VALUES (?, ?, ?)",
-    [title, description, completed],
+    "INSERT INTO tasks (title, completed) VALUES (?, ?)",
+    [title, completed],
     (error) => {
       if (error) {
-        return res.status(500).json({ message: "DB error" });
+        console.log(error.code);
+        return res.status(500).json({ error: "DB error" });
       }
-      res.status(201).json({ message: "Task created" });
     },
   );
+
+  res.status(201).json({ message: "Task created" });
 });
 
 app.listen(PORT, () => {
