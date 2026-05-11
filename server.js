@@ -17,7 +17,22 @@ app.get("/", (req, res) => {
 
 app.get("/tasks", (req, res) => {
   db.all("SELECT * FROM tasks", (error, rows) => {
+    if (error) {
+      return res.status(500).json({ error: "DB error" });
+    }
     res.json(rows);
+  });
+});
+app.get("/tasks/:id", (req, res) => {
+  const id = req.params.id;
+  db.get("SELECT * FROM tasks WHERE id = ?", [id], (error, row) => {
+    if (error) {
+      return res.status(500).json({ error: "DB error" });
+    }
+    if (!row) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.json(row);
   });
 });
 
